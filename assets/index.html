@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TFZ TV - Streaming Illimité 4K</title>
+    <!-- Favicon / App Icon -->
+    <link rel="icon" href="logo/1.png" sizes="any">
+    <link rel="icon" type="image/png" href="logo/1.png" sizes="32x32">
+    <link rel="apple-touch-icon" href="logo/1.png">
+    <link rel="shortcut icon" href="logo/1.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            500: '#E50914', // Rosso Netflix
+                            600: '#B81D24', // Rosso più scuro per hover
+                            dark: '#141414', // Sfondo quasi nero stile Netflix
+                            card: '#1F1F1F',  // Grigio scuro per le card
+                            whatsapp: '#25D366' // Verde WhatsApp
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        #tfz-order-modal .modal-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+        #tfz-order-modal label { display:block; font-size:13px; color:#cfcfcf; margin-bottom:6px; }
+        #tfz-order-modal input, #tfz-order-modal textarea { width:100%; padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:#0b0b0b; color:#fff; }
+        #tfz-order-modal textarea { min-height:96px; resize:vertical; }
+        #tfz-order-modal .modal-actions { display:flex; gap:8px; margin-top:12px; }
+        #tfz-order-modal .btn { padding:10px 14px; border-radius:8px; cursor:pointer; }
+        #tfz-order-modal .btn-primary { background:#E50914; color:#fff; border:none; }
+        #tfz-order-modal .btn-ghost { background:transparent; color:#fff; border:1px solid rgba(255,255,255,0.06); }
+
+        /* Order modal overlay and card */
+        #tfz-order-modal { display: none; position: fixed; inset: 0; z-index: 75; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        #tfz-order-modal.open { display: flex; }
+        #tfz-order-modal .modal-card { background: #0f0f10; padding:20px; border-radius:10px; max-width:520px; width:92%; text-align:left; border:1px solid rgba(255,255,255,0.04); }
+        #tfz-order-modal .modal-head h3 { margin:0; }
+        #tfz-order-modal .modal-actions { justify-content:flex-end; }
+
+        /* Confirmation dialog */
+        #tfz-confirm { display:none; position: fixed; inset: 0; z-index: 72; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        #tfz-confirm.open { display:flex; }
+        #tfz-confirm .card { background: #0f0f10; padding:20px; border-radius:10px; max-width:520px; width:92%; text-align:center; border:1px solid rgba(255,255,255,0.04); }
+
+        /* Order Flow modal variables and styles */
+        :root {
+            --primary-color: #E50914;
+            --bg-card: #0f0f10;
+            --modal-bg: rgba(0,0,0,0.65);
+            --text-muted: #cfcfcf;
+        }
+
+        #order-flow-modal { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0); align-items: center; justify-content: center; padding: 24px; transition: background-color 240ms ease; }
+        #order-flow-modal.open { display:flex; background: var(--modal-bg); }
+        /* Card entry animation */
+        #order-flow-modal .order-card { background: var(--bg-card); color: #fff; border-radius: 12px; width: 100%; max-width: 640px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.04); overflow: hidden; transform: translateY(12px) scale(0.995); opacity: 0; transition: transform 240ms cubic-bezier(.2,.9,.2,1), opacity 200ms ease; }
+        #order-flow-modal.open .order-card { transform: translateY(0) scale(1); opacity: 1; }
+        #order-flow-modal .order-card .card-body { padding: 22px; }
+        #order-flow-modal h3 { margin: 0 0 8px 0; font-size: 1.5rem; letter-spacing: -0.2px; }
+        #order-flow-modal p.lead { color: var(--text-muted); margin-bottom: 14px; }
+        #order-flow-modal label { display:block; font-size:13px; color:var(--text-muted); margin-bottom:6px; }
+        #order-flow-modal input { width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background:#0b0b0b; color:#fff; margin-bottom:12px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.01); }
+        #order-flow-modal .actions { display:flex; gap:8px; justify-content:flex-end; align-items:center; }
+        #order-flow-modal .btn-primary { background: linear-gradient(180deg,var(--primary-color), #b0161a); color: #fff; border: none; padding: 10px 14px; border-radius:10px; cursor:pointer; box-shadow: 0 6px 20px rgba(229,9,20,0.18); }
+        #order-flow-modal .btn-primary:active { transform: translateY(1px); }
+        #order-flow-modal .btn-ghost { background: transparent; color:#fff; border:1px solid rgba(255,255,255,0.06); padding:8px 12px; border-radius:10px; cursor:pointer; }
+
+        /* subtle focus states */
+        #order-flow-modal input:focus { outline: 2px solid rgba(229,9,20,0.12); border-color: rgba(229,9,20,0.18); }
+
+        /* Spinner */
+        .of-spinner { width:18px; height:18px; border:2px solid rgba(255,255,255,0.12); border-top-color: #fff; border-radius:50%; animation: of-spin 1s linear infinite; display:inline-block; vertical-align:middle; margin-right:8px; }
+        @keyframes of-spin { to { transform: rotate(360deg); } }
+
+        /* Success state and animation */
+        .order-success { text-align:center; padding:28px 20px; transform: scale(0.96); opacity: 0; transition: transform 300ms cubic-bezier(.2,.9,.3,1), opacity 220ms ease; }
+        .order-success p { color: var(--text-muted); margin-top:12px; }
+        .order-success.animate { transform: scale(1); opacity: 1; }
+
+        /* Checkmark SVG animation */
+        .order-success svg { display:inline-block; margin-bottom:8px; }
+        .order-success svg circle { stroke: rgba(255,255,255,0.08); }
+        .order-success svg path { stroke: #fff; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; fill: none; stroke-dasharray: 48; stroke-dashoffset: 48; transition: stroke-dashoffset 520ms cubic-bezier(.2,.9,.2,1) 120ms; }
+        .order-success.animate svg path { stroke-dashoffset: 0; }
+
+        @media (max-width: 480px) {
+            #order-flow-modal .order-card { max-width: 92%; }
+            #order-flow-modal h3 { font-size: 1.25rem; }
+        }
+
+        /* Improve existing small confirmation dialog visuals */
+        #tfz-confirm { display:none; position: fixed; inset: 0; z-index: 72; background: rgba(0,0,0,0.55); align-items: center; justify-content: center; opacity: 0; transition: opacity 200ms ease; }
+        #tfz-confirm.open { display:flex; opacity: 1; }
+        #tfz-confirm .card { background: linear-gradient(180deg,#0b0b0b,#101214); padding:22px; border-radius:12px; max-width:520px; width:92%; text-align:center; border:1px solid rgba(255,255,255,0.04); transform: translateY(8px); opacity: 0; transition: transform 220ms ease, opacity 200ms ease; }
+        #tfz-confirm.open .card { transform: translateY(0); opacity: 1; }
+
+        /* Lightbox subtle fade */
+        #tfz-lightbox { transition: opacity 220ms ease, visibility 220ms; opacity: 0; visibility: hidden; }
+        #tfz-lightbox.open { opacity: 1; visibility: visible; }
+        /* Hide horizontal scrollbar for marquee */
+        .marquee-content { -ms-overflow-style: none; scrollbar-width: none; }
+        .marquee-content::-webkit-scrollbar { display: none; height: 0; }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+            // --- Lightbox wiring ---
+            const selector = '#channels img, #vod img';
+            const nodeList = Array.from(document.querySelectorAll(selector));
+            const lb = document.getElementById('tfz-lightbox');
+            const lbImg = document.getElementById('tfz-lightbox-img');
+
+            if(nodeList.length){
+                const srcs = nodeList.map(img => img.src);
+                nodeList.forEach((img, i) => {
+                    img.dataset.lbIndex = i;
+                    img.style.cursor = 'zoom-in';
+                    img.addEventListener('click', (e) => { e.preventDefault(); openLightbox(i); });
+                });
+
+                const btnClose = lb.querySelector('.lb-close');
+                const btnPrev = lb.querySelector('.lb-prev');
+                const btnNext = lb.querySelector('.lb-next');
+                let current = 0; let touchStartX = 0;
+                function openLightbox(index){ if(!srcs[index]) return; current = index; lbImg.src = srcs[current]; lb.classList.add('open'); lb.setAttribute('aria-hidden','false'); document.body.style.overflow = 'hidden'; }
+                function closeLightbox(){ lb.classList.remove('open'); lb.setAttribute('aria-hidden','true'); lbImg.src = ''; document.body.style.overflow = ''; }
+                function next(){ current = (current + 1) % srcs.length; lbImg.src = srcs[current]; }
+                function prev(){ current = (current - 1 + srcs.length) % srcs.length; lbImg.src = srcs[current]; }
+                btnClose.addEventListener('click', closeLightbox); btnNext.addEventListener('click', next); btnPrev.addEventListener('click', prev);
+                lb.addEventListener('click', (e) => { if(e.target === lb) closeLightbox(); });
+                document.addEventListener('keydown', (e) => { if(!lb.classList.contains('open')) return; if(e.key === 'Escape') closeLightbox(); if(e.key === 'ArrowRight') next(); if(e.key === 'ArrowLeft') prev(); });
+                lb.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
+                lb.addEventListener('touchend', (e) => { const diff = e.changedTouches[0].screenX - touchStartX; if(Math.abs(diff) > 40){ if(diff < 0) next(); else prev(); } });
+            }
+
+            // Order modal and confirmation removed
+
+            // --- Marquee auto-scroll ---
+            const marquee = document.querySelector('.marquee-content');
+            if(marquee){
+                // Duplicate content for seamless loop
+                marquee.innerHTML = marquee.innerHTML + marquee.innerHTML;
+                marquee.style.overflowX = 'auto';
+                marquee.style.scrollBehavior = 'smooth';
+                marquee.style.webkitOverflowScrolling = 'touch';
+
+                let isHover = false;
+                marquee.addEventListener('mouseenter', () => isHover = true);
+                marquee.addEventListener('mouseleave', () => isHover = false);
+                marquee.addEventListener('touchstart', () => isHover = true);
+                marquee.addEventListener('touchend', () => isHover = false);
+
+                const halfWidth = () => marquee.scrollWidth / 2;
+                const speed = 0.5; // pixels per frame, adjust as needed
+
+                function step(){
+                    if(!isHover){
+                        marquee.scrollLeft += speed;
+                        if(marquee.scrollLeft >= halfWidth()) marquee.scrollLeft = 0;
+                    }
+                    requestAnimationFrame(step);
+                }
+
+                // start
+                requestAnimationFrame(step);
+            }
+
+        });
+    </script>
+</head>
+<body class="bg-brand-dark text-white font-sans antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Navbar -->
+    <nav id="navbar" class="fixed w-full z-50 transition-all duration-300 py-4 bg-gradient-to-b from-black/80 to-transparent">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center">
+                <!-- Logo Testuale TFZ TV -->
+                <div class="flex items-center gap-1 cursor-pointer group" onclick="window.scrollTo(0,0)">
+                    <span class="text-4xl font-black text-brand-500 tracking-tighter group-hover:scale-105 transition-transform">TFZ</span>
+                    <span class="text-4xl font-black text-white tracking-tighter">TV</span>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-gray-300 hover:text-white transition-colors text-sm font-medium">Fonctionnalités</a>
+                    <a href="#channels" class="text-gray-300 hover:text-white transition-colors text-sm font-medium">Chaînes</a>
+                    <a href="#vod" class="text-gray-300 hover:text-white transition-colors text-sm font-medium">VOD</a>
+                    <a href="#compatibility" class="text-gray-300 hover:text-white transition-colors text-sm font-medium">Appareils</a>
+                    <a href="#pricing" class="text-gray-300 hover:text-white transition-colors text-sm font-medium">Tarifs</a>
+                    <button onclick="scrollToPricing()" class="bg-brand-500 hover:bg-brand-600 text-white font-bold py-2 px-6 rounded-sm transition-all shadow-[0_0_15px_rgba(229,9,20,0.4)] hover:shadow-[0_0_25px_rgba(229,9,20,0.6)]">
+                        Commencer
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-white focus:outline-none">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Panel -->
+        <div id="mobile-menu" class="hidden md:hidden bg-black/95 backdrop-blur-md absolute w-full border-b border-gray-800">
+            <div class="px-4 pt-2 pb-6 space-y-2">
+                <a href="#features" class="block px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-md">Fonctionnalités</a>
+                <a href="#channels" class="block px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-md">Chaînes</a>
+                <a href="#vod" class="block px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-md">VOD</a>
+                <a href="#compatibility" class="block px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-md">Appareils</a>
+                <a href="#pricing" class="block px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-md">Tarifs</a>
+                <button onclick="scrollToPricing()" class="w-full text-center mt-4 bg-brand-500 text-white font-bold py-3 rounded-sm">
+                    Commencer
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden min-h-screen lg:h-screen lg:max-h-[900px] flex items-center">
+        <!-- Background Elements -->
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
+            <!-- Hero Image Background (Cinema/TV Theme) -->
+            <img src="https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?q=80&w=2069&auto=format&fit=crop" alt="TFZ TV Background" class="absolute inset-0 w-full h-full object-cover opacity-50 hero-zoom">
+            
+            <!-- Gradient Overlay (Bottom Up) for readability -->
+            <div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/70 to-transparent"></div>
+            <!-- Gradient Overlay (Top Down) for navbar -->
+            <div class="absolute inset-0 bg-gradient-to-b from-brand-dark/90 via-transparent to-transparent"></div>
+            
+            <!-- Red Blur Accent -->
+            <div class="absolute top-[-10%] right-[-5%] w-96 h-96 bg-brand-500/20 rounded-full blur-[120px] mix-blend-overlay"></div>
+            
+            <!-- Grid Pattern -->
+            <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 w-full">
+            <div class="reveal inline-block px-4 py-1.5 mb-6 rounded-full glass border-brand-500/30 backdrop-blur-md">
+                <span class="text-brand-500 text-sm font-bold tracking-wide uppercase"><i class="fas fa-fire mr-2"></i>La meilleure qualité 4K du marché</span>
+            </div>
+            
+            <h1 class="reveal delay-100 text-4xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight drop-shadow-2xl">
+                Tout le Monde du<br>
+                <span class="text-gradient drop-shadow-lg">Streaming Illimité</span>
+            </h1>
+            
+            <p class="reveal delay-200 text-xl text-gray-300 mb-10 max-w-2xl mx-auto drop-shadow-md font-medium">
+                Accédez à plus de 10 000 chaînes, films et séries TV en qualité FHD et 4K. 
+                Aucun buffering, stabilité garantie à 99.9% et support actif 24/7.
+            </p>
+            
+            <div class="reveal delay-300 flex flex-col sm:flex-row justify-center gap-4">
+                <button onclick="scrollToPricing()" class="bg-brand-500 hover:bg-brand-600 text-white font-bold text-lg py-4 px-8 rounded-sm transition-all transform hover:scale-105 shadow-[0_0_25px_rgba(229,9,20,0.5)]">
+                    <i class="fas fa-play mr-2"></i> Choisir votre Plan
+                </button>
+                <a href="https://wa.me/33758874113" target="_blank" class="glass hover:bg-white/10 text-white font-semibold text-lg py-4 px-8 rounded-sm transition-all flex items-center justify-center gap-2">
+                    <i class="fab fa-whatsapp text-brand-whatsapp text-xl"></i> WhatsApp
+                </a>
+            </div>
+
+            <div class="reveal delay-400 mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-gray-300 text-sm font-semibold uppercase tracking-wider opacity-90 drop-shadow-sm">
+                <div class="flex items-center justify-center gap-2"><i class="fas fa-check text-brand-500"></i> Activation Immédiate</div>
+                <div class="flex items-center justify-center gap-2"><i class="fas fa-check text-brand-500"></i> Satisfait ou Remboursé</div>
+                <div class="flex items-center justify-center gap-2"><i class="fas fa-check text-brand-500"></i> Sans Coupure</div>
+                <div class="flex items-center justify-center gap-2"><i class="fas fa-check text-brand-500"></i> Serveurs Européens</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sports Marquee Section -->
+    <section class="bg-brand-500/10 border-y border-brand-500/20 py-6 overflow-hidden relative">
+         <div class="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-brand-dark to-transparent z-10"></div>
+         <div class="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-brand-dark to-transparent z-10"></div>
+         
+         <div class="marquee-content flex gap-6 items-center overflow-x-auto whitespace-nowrap px-6 py-3" style="scroll-behavior:smooth; -webkit-overflow-scrolling:touch;">
+             <span class="inline-block flex-none mx-6 text-2xl font-bold text-gray-400"><i class="fas fa-futbol mr-2 text-brand-500"></i> CHAMPIONS LEAGUE</span>
+             <span class="inline-block flex-none mx-6 text-2xl font-bold text-gray-400"><i class="fas fa-basketball-ball mr-2 text-brand-500"></i> NBA</span>
+             <span class="inline-block flex-none mx-6 text-2xl font-bold text-gray-400"><i class="fas fa-running mr-2 text-brand-500"></i> PREMIER LEAGUE</span>
+             <span class="inline-block flex-none mx-6 text-2xl font-bold text-gray-400"><i class="fas fa-car mr-2 text-brand-500"></i> FORMULA 1</span>
+             <span class="inline-block flex-none mx-6 text-2xl font-bold text-gray-400"><i class="fas fa-trophy mr-2 text-brand-500"></i> LIGUE 1</span>
+             <span class="inline-block flex-none mx-6 text-2xl font-bold text-gray-400"><i class="fas fa-table-tennis mr-2 text-brand-500"></i> SERIE A</span>
+             <span class="inline-block flex-none mx-6 text-2xl font-bold text-gray-400"><i class="fas fa-flag-checkered mr-2 text-brand-500"></i> MOTOGP</span>
+             <span class="inline-block flex-none mx-6 text-2xl font-bold text-gray-400"><i class="fas fa-futbol mr-2 text-brand-500"></i> CHAMPIONS LEAGUE</span>
+             <span class="inline-block flex-none mx-6 text-2xl font-bold text-gray-400"><i class="fas fa-basketball-ball mr-2 text-brand-500"></i> NBA</span>
+             <span class="inline-block flex-none mx-6 text-2xl font-bold text-gray-400"><i class="fas fa-running mr-2 text-brand-500"></i> PREMIER LEAGUE</span>
+             <span class="inline-block flex-none mx-6 text-2xl font-bold text-gray-400"><i class="fas fa-car mr-2 text-brand-500"></i> FORMULA 1</span>
+             <span class="inline-block flex-none mx-6 text-2xl font-bold text-gray-400"><i class="fas fa-trophy mr-2 text-brand-500"></i> LIGUE 1</span>
+         </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-black">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Pourquoi choisir <span class="text-brand-500">TFZ TV</span> ?</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">Nous offrons la meilleure expérience de divertissement numérique avec des technologies de pointe.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="reveal glass p-8 rounded-lg hover:border-brand-500/50 transition-colors group bg-brand-card">
+                    <div class="w-14 h-14 bg-black rounded-lg flex items-center justify-center mb-6 border border-gray-800 group-hover:border-brand-500/50 transition-colors">
+                        <i class="fas fa-tv text-brand-500 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">4K & FHD Ultra HDR</h3>
+                    <p class="text-gray-400">Profitez de vos contenus préférés avec la plus haute résolution disponible. Couleurs vives et détails nets.</p>
+                </div>
+                <div class="reveal delay-100 glass p-8 rounded-lg hover:border-brand-500/50 transition-colors group bg-brand-card">
+                    <div class="w-14 h-14 bg-black rounded-lg flex items-center justify-center mb-6 border border-gray-800 group-hover:border-brand-500/50 transition-colors">
+                        <i class="fas fa-tachometer-alt text-brand-500 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">Technologie Anti-Freeze</h3>
+                    <p class="text-gray-400">Nos serveurs utilisent une technologie avancée d'équilibrage de charge pour éviter les blocages et le buffering.</p>
+                </div>
+                <div class="reveal delay-200 glass p-8 rounded-lg hover:border-brand-500/50 transition-colors group bg-brand-card">
+                    <div class="w-14 h-14 bg-black rounded-lg flex items-center justify-center mb-6 border border-gray-800 group-hover:border-brand-500/50 transition-colors">
+                        <i class="fas fa-headset text-brand-500 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">Support VIP 24/7</h3>
+                    <p class="text-gray-400">Notre équipe technique est toujours disponible sur WhatsApp et Email pour vous aider à l'installation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Channel List Section (Bento Layout) -->
+    <section id="channels" class="py-20 bg-brand-dark relative overflow-hidden">
+        <div class="absolute -right-20 top-20 w-64 h-64 bg-brand-500/5 rounded-full blur-[80px]"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Chaînes & <span class="text-brand-500">Services Inclus</span></h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">Retrouvez vos chaînes favorites et services de streaming en un seul endroit.</p>
+            </div>
+
+            <!-- Bento Grid Layout -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[120px]">
+                
+                <!-- Canal+ (Grand Carré / Principal) - image only per request -->
+                <div class="reveal glass p-0 rounded-md col-span-2 row-span-2 relative group overflow-hidden transition-all cursor-default bg-black">
+                    <img src="Canali/1.png" alt="CANAL+" class="absolute inset-0 w-full h-full object-cover object-top md:object-center group-hover:scale-105 transition-transform duration-700">
+                </div>
+
+                <!-- BeIN Sports (Carré) -->
+                <div class="reveal delay-100 p-0 rounded-md relative group overflow-hidden transition-all cursor-default">
+                    <img src="Canali/2.png" alt="beIN" class="absolute inset-0 w-full h-full object-cover object-top md:object-center group-hover:scale-110 transition-transform duration-500">
+                </div>
+
+                 <!-- RMC Sport (Carré) -->
+                
+                 <div class="reveal delay-100 p-0 rounded-md relative group overflow-hidden transition-all cursor-default">
+                     <img src="Canali/3.png" alt="RMC Sport" class="absolute inset-0 w-full h-full object-cover object-top md:object-center group-hover:scale-110 transition-transform duration-500 grayscale">
+                </div>
+
+                <!-- Chaines Généralistes (Rectangle Large) -->
+                <div class="reveal delay-200 p-0 rounded-md col-span-2 relative group overflow-hidden transition-all cursor-default">
+                    <img src="Canali/4.png" alt="Generalistes" class="absolute inset-0 w-full h-full object-cover object-top md:object-center group-hover:scale-105 transition-transform duration-500">
+                </div>
+
+                      <!-- Netflix (Carré) -->
+                      <div class="reveal delay-200 p-0 rounded-md relative group overflow-hidden transition-all cursor-default">
+                          <img src="Canali/5.png" alt="Netflix" class="absolute inset-0 w-full h-full object-cover object-top md:object-center group-hover:scale-110 transition-transform duration-500">
+                </div>
+
+                      <!-- Disney+ (Carré) -->
+                      <div class="reveal delay-300 p-0 rounded-md relative group overflow-hidden transition-all cursor-default">
+                          <img src="Canali/6.png" alt="Disney+" class="absolute inset-0 w-full h-full object-cover object-top md:object-center group-hover:scale-110 transition-transform duration-500">
+                </div>
+
+                <!-- Prime Video & Cinema (Rectangle Vertical/Haut) -->
+                <div class="reveal delay-300 p-0 rounded-md row-span-2 relative group overflow-hidden transition-all cursor-default">
+                    <img src="Canali/7.png" alt="Prime Video" class="absolute inset-0 w-full h-full object-cover object-top md:object-center group-hover:scale-105 transition-transform duration-500">
+                </div>
+
+                <!-- DAZN (Carré) -->
+                <div class="reveal delay-300 p-0 rounded-md relative group overflow-hidden transition-all cursor-default">
+                    <img src="Canali/8.png" alt="DAZN" class="absolute inset-0 w-full h-full object-cover object-top md:object-center group-hover:scale-110 transition-transform duration-500 grayscale">
+                </div>
+
+                      <!-- Sky Sports (Carré) -->
+                      <div class="reveal delay-400 p-0 rounded-md relative group overflow-hidden transition-all cursor-default">
+                          <img src="Canali/9.png" alt="Sky Sports" class="absolute inset-0 w-full h-full object-cover object-top md:object-center group-hover:scale-110 transition-transform duration-500">
+                </div>
+                
+                <!-- Eurosport (Carré) -->
+                <div class="reveal delay-400 p-0 rounded-md relative group overflow-hidden transition-all cursor-default">
+                    <img src="Canali/10.png" alt="Eurosport" class="absolute inset-0 w-full h-full object-cover object-top md:object-center group-hover:scale-110 transition-transform duration-500">
+                </div>
+
+                <!-- Nat Geo (Carré) -->
+                <div class="reveal delay-400 p-0 rounded-md relative group overflow-hidden transition-all cursor-default">
+                    <img src="Canali/12.png" alt="National Geographic" class="absolute inset-0 w-full h-full object-cover object-top md:object-center group-hover:scale-110 transition-transform duration-500">
+                </div>
+
+                <!-- Kids (Rectangle Large) -->
+                <div class="reveal delay-400 p-0 rounded-md col-span-2 relative group overflow-hidden transition-all cursor-default">
+                    <img src="Canali/11.png" alt="Kids" class="absolute inset-0 w-full h-full object-cover object-top md:object-center group-hover:scale-105 transition-transform duration-500">
+               </div>
+
+               <!-- News (Carré) -->
+               <div class="reveal delay-400 p-0 rounded-md relative group overflow-hidden transition-all cursor-default">
+                <img src="Canali/13.png" alt="News" class="absolute inset-0 w-full h-full object-cover object-top md:object-center group-hover:scale-110 transition-transform duration-500">
+                </div>
+
+                <!-- Autres (Carré - Modificato per essere accanto a News) -->
+                <div class="reveal p-0 rounded-md relative group overflow-hidden transition-all cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1556155092-490a1ba16284?q=80&w=2070&auto=format&fit=crop" alt="World Channels" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                </div>
+
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- NEW SECTION: Cinema & Series VOD (Large Photos) -->
+    <section id="vod" class="py-20 bg-black overflow-hidden relative">
+        <div class="absolute left-[-20%] bottom-0 w-[50%] h-[50%] bg-brand-500/5 rounded-full blur-[150px]"></div>
+
+        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-3xl md:text-5xl font-bold mb-4">Cinéma & <span class="text-gradient">Séries VOD</span></h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto">Une bibliothèque massive de films et séries en 4K Ultra HD, mise à jour quotidiennement.</p>
+            </div>
+
+            <!-- Featured Giant Item (Hero style within section) -->
+            <div class="reveal relative w-full h-[60vh] min-h-[500px] rounded-2xl overflow-hidden mb-12 group cursor-pointer border border-gray-800 hover:border-brand-500 transition-colors duration-500">
+                <img src="Film/b1.png" alt="Featured Movie" class="object-cover w-full h-full transform transition duration-1000 group-hover:scale-105">
+
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+
+                <div class="absolute bottom-0 left-0 p-8 md:p-16 w-full md:w-2/3">
+                    <span class="bg-brand-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-4 inline-block shadow-lg">Featured</span>
+                    <h3 class="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight drop-shadow-lg">Sélection du Moment</h3>
+                    <p class="text-gray-200 text-lg md:text-xl mb-6 line-clamp-2 md:line-clamp-3 drop-shadow-md">Profitez de ce film sélectionné en 4K Ultra HD.</p>
+                    <div class="flex gap-4">
+                        <button class="bg-white text-black font-bold py-3 px-8 rounded-sm hover:bg-gray-200 transition-colors flex items-center gap-2">
+                            <i class="fas fa-play"></i> Regarder
+                        </button>
+                        <button class="bg-white/20 backdrop-blur-md text-white font-bold py-3 px-8 rounded-sm hover:bg-white/30 transition-colors">
+                            + Ma Liste
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Releases Grid (4 Small Rectangles - Vertical Posters) -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+                <!-- Movie 1 -->
+                <div class="reveal delay-100 relative aspect-[2/3] rounded-lg overflow-hidden group cursor-pointer border border-gray-800 hover:border-brand-500 transition-colors">
+                    <img src="Film/q1.png" class="object-cover w-full h-full transform transition duration-500 group-hover:scale-110">
+                </div>
+                <!-- Movie 2 -->
+                <div class="reveal delay-150 relative aspect-[2/3] rounded-lg overflow-hidden group cursor-pointer border border-gray-800 hover:border-brand-500 transition-colors">
+                    <img src="Film/q2.png" class="object-cover w-full h-full transform transition duration-500 group-hover:scale-110">
+                </div>
+                <!-- Movie 3 -->
+                <div class="reveal delay-200 relative aspect-[2/3] rounded-lg overflow-hidden group cursor-pointer border border-gray-800 hover:border-brand-500 transition-colors">
+                    <img src="Film/q3.png" class="object-cover w-full h-full transform transition duration-500 group-hover:scale-110">
+                </div>
+                <!-- Movie 4 -->
+                <div class="reveal delay-250 relative aspect-[2/3] rounded-lg overflow-hidden group cursor-pointer border border-gray-800 hover:border-brand-500 transition-colors">
+                    <img src="Film/q4.png" class="object-cover w-full h-full transform transition duration-500 group-hover:scale-110">
+                </div>
+            </div>
+
+            <!-- (Removed small Tendenze scroller to restore original layout) -->
+
+                 <!-- Removed three small movie cards per request -->
+            </div>
+            
+            <!-- Horizontal Scroll Section (Large Posters) -->
+            <div class="mt-12 reveal delay-400">
+                <h3 class="text-2xl font-bold text-white mb-6 px-2 flex items-center gap-2">
+                    <i class="fas fa-chart-line text-brand-500"></i> Tendances de la semaine
+                </h3>
+                <div class="flex overflow-x-auto gap-6 pb-8 snap-x scrollbar-hide" style="scrollbar-width: none; -ms-overflow-style: none;">
+                    <!-- Poster 1 -->
+                    <div class="flex-none w-[250px] md:w-[300px] h-[380px] md:h-[450px] relative rounded-xl overflow-hidden group cursor-pointer snap-start border border-gray-800 hover:border-gray-600 shadow-lg">
+                        <img src="Film/s1.png" class="object-cover w-full h-full transform transition duration-500 group-hover:scale-105" alt="Top 1">
+                        <div class="absolute top-2 left-2 bg-black/60 text-white text-xs font-bold px-2 py-1 rounded">TOP 1</div>
+                    </div>
+                    <!-- Poster 2 -->
+                    <div class="flex-none w-[250px] md:w-[300px] h-[380px] md:h-[450px] relative rounded-xl overflow-hidden group cursor-pointer snap-start border border-gray-800 hover:border-gray-600 shadow-lg">
+                        <img src="Film/s2.png" class="object-cover w-full h-full transform transition duration-500 group-hover:scale-105" alt="Top 2">
+                         <div class="absolute top-2 left-2 bg-black/60 text-white text-xs font-bold px-2 py-1 rounded">TOP 2</div>
+                    </div>
+                    <!-- Poster 3 -->
+                    <div class="flex-none w-[250px] md:w-[300px] h-[380px] md:h-[450px] relative rounded-xl overflow-hidden group cursor-pointer snap-start border border-gray-800 hover:border-gray-600 shadow-lg">
+                        <img src="Film/s3.png" class="object-cover w-full h-full transform transition duration-500 group-hover:scale-105" alt="Top 3">
+                         <div class="absolute top-2 left-2 bg-black/60 text-white text-xs font-bold px-2 py-1 rounded">TOP 3</div>
+                    </div>
+                    <!-- Poster 4 -->
+                    <div class="flex-none w-[250px] md:w-[300px] h-[380px] md:h-[450px] relative rounded-xl overflow-hidden group cursor-pointer snap-start border border-gray-800 hover:border-gray-600 shadow-lg">
+                        <img src="Film/s4.png" class="object-cover w-full h-full transform transition duration-500 group-hover:scale-105" alt="Top 4">
+                    </div>
+                     <!-- Poster 5 -->
+                     <div class="flex-none w-[250px] md:w-[300px] h-[380px] md:h-[450px] relative rounded-xl overflow-hidden group cursor-pointer snap-start border border-gray-800 hover:border-gray-600 shadow-lg">
+                        <img src="Film/s5.png" class="object-cover w-full h-full transform transition duration-500 group-hover:scale-105" alt="Top 5">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Content Showcase (Stats) -->
+    <section class="py-12 border-y border-gray-900 bg-black">
+        <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+            <!-- MODIFICA: grid-cols-4 anche su mobile, ridotto gap e dimensione testo per adattamento -->
+            <div class="grid grid-cols-4 gap-2 md:gap-8 text-center">
+                <div class="reveal">
+                    <div class="text-2xl md:text-4xl font-bold text-white mb-1 md:mb-2">12k+</div>
+                    <div class="text-brand-500 font-medium text-xs md:text-base leading-tight">Chaînes Live</div>
+                </div>
+                <div class="reveal delay-100">
+                    <div class="text-2xl md:text-4xl font-bold text-white mb-1 md:mb-2">50k+</div>
+                    <div class="text-brand-500 font-medium text-xs md:text-base leading-tight">Films VOD</div>
+                </div>
+                <div class="reveal delay-200">
+                    <div class="text-2xl md:text-4xl font-bold text-white mb-1 md:mb-2">8k+</div>
+                    <div class="text-brand-500 font-medium text-xs md:text-base leading-tight">Séries TV</div>
+                </div>
+                <div class="reveal delay-300">
+                    <div class="text-2xl md:text-4xl font-bold text-white mb-1 md:mb-2">99.9%</div>
+                    <div class="text-brand-500 font-medium text-xs md:text-base leading-tight">Uptime</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 relative bg-brand-dark">
+        <div class="absolute inset-0 overflow-hidden -z-10">
+             <div class="absolute top-[20%] left-[50%] transform -translate-x-1/2 w-full h-full bg-brand-500/5 rounded-full blur-[120px]"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Nos <span class="text-gradient">Abonnements</span></h2>
+                <p class="text-gray-400">Choisissez le plan parfait pour vous. Sans engagement, annulez quand vous voulez.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <!-- TFZ START -->
+                <div class="reveal glass p-8 rounded-lg border border-gray-800 transition-all bg-brand-card">
+                    <div class="text-center">
+                        <h3 class="text-xl font-bold text-gray-300">TFZ START</h3>
+                        <div class="my-6">
+                            <span class="text-4xl font-bold text-white">69€</span>
+                            <span class="text-gray-500">/12 mois</span>
+                        </div>
+                        <p class="text-sm text-gray-400 mb-6">La solution idéale pour tester la performance du service.</p>
+                    </div>
+                    <ul class="space-y-4 mb-8 text-gray-300 text-sm">
+                        <li class="flex items-center"><i class="fas fa-check text-brand-500 mr-3"></i> Plus de 12 000 chaînes en direct (Live TV)</li>
+                        <li class="flex items-center"><i class="fas fa-check text-brand-500 mr-3"></i> Plus de 60 000 contenus VOD (Films & Séries)</li>
+                        <li class="flex items-center"><i class="fas fa-check text-brand-500 mr-3"></i> Qualité d'image Haute Définition (FHD / 4K)</li>
+                        <li class="flex items-center"><i class="fas fa-check text-brand-500 mr-3"></i> Support technique Standard</li>
+                        <li class="flex items-center"><i class="fas fa-check text-brand-500 mr-3"></i> Connexion pour 1 appareil</li>
+                    </ul>
+                    <button class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-sm transition-colors order-btn" data-plan="TFZ START">
+                        Commander
+                    </button>
+                </div>
+
+                <!-- 48 MOIS -->
+                <div class="reveal delay-100 relative bg-brand-card p-8 rounded-lg border-2 border-brand-500 shadow-[0_0_30px_rgba(229,9,20,0.12)] z-10">
+                    <div class="absolute top-0 right-0 bg-brand-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-md">MEILLEURE OFFRE</div>
+                    <div class="text-center">
+                        <h3 class="text-xl font-bold text-brand-500">48 MOIS</h3>
+                        <div class="my-6">
+                            <span class="text-5xl font-bold text-white">99€</span>
+                            <span class="text-gray-500">/48 mois</span>
+                        </div>
+                        <p class="text-sm text-gray-400 mb-6">Notre meilleure offre pour 2 année complète de divertissement.</p>
+                    </div>
+                    <ul class="space-y-4 mb-8 text-white text-sm">
+                        <li class="flex items-center"><i class="fas fa-check text-brand-500 mr-3"></i> Durée de l'abonnement : 48 Mois</li>
+                        <li class="flex items-center"><i class="fas fa-check text-brand-500 mr-3"></i> Plus de 12 000 chaînes en direct (Live TV)</li>
+                        <li class="flex items-center"><i class="fas fa-check text-brand-500 mr-3"></i> Plus de 60 000 contenus VOD (Films & Séries)</li>
+                        <li class="flex items-center"><i class="fas fa-check text-brand-500 mr-3"></i> Qualité d'image Haute Définition (FHD / 4K)</li>
+                        <li class="flex items-center"><i class="fas fa-check text-brand-500 mr-3"></i> Support VIP Prioritaire</li>
+                        <li class="flex items-center"><i class="fas fa-check text-brand-500 mr-3"></i> Connexion pour 1 appareil</li>
+                    </ul>
+                    <button class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-4 rounded-sm transition-colors shadow-lg order-btn" data-plan="48 MOIS">Commander</button>
+                </div>
+
+                <!-- TFZ LIFETIME -->
+                <div class="reveal delay-200 glass p-8 rounded-lg border border-gray-800 transition-all bg-brand-card">
+                    <div class="text-center">
+                        <h3 class="text-xl font-bold text-gray-300">OFFRE ILLIMITÉE - TFZ LIFETIME</h3>
+                        <div class="my-6">
+                            <span class="text-4xl font-bold text-white">249€</span>
+                            <span class="text-gray-500">(Paiement unique)</span>
+                        </div>
+                        <p class="text-sm text-gray-400 mb-6">Payez une seule volta, profitez per sempre. Sans abonnement.</p>
+                    </div>
+                    <ul class="space-y-4 mb-8 text-gray-300 text-sm">
+                        <li class="flex items-center"><i class="fas fa-check text-brand-500 mr-3"></i> Durée illimitée (À vie)</li>
+                        <li class="flex items-center"><i class="fas fa-check text-brand-500 mr-3"></i> Plus de 12 000 chaînes en direct (Live TV)</li>
+                        <li class="flex items-center"><i class="fas fa-check text-brand-500 mr-3"></i> Plus de 60 000 contenus VOD (Films & Séries)</li>
+                        <li class="flex items-center"><i class="fas fa-check text-brand-500 mr-3"></i> Qualité d'image Haute Définition (FHD / 4K)</li>
+                        <li class="flex items-center"><i class="fas fa-check text-brand-500 mr-3"></i> Support VIP Prioritaire</li>
+                        <li class="flex items-center"><i class="fas fa-check text-brand-500 mr-3"></i> Connexion pour 1 appareil</li>
+                    </ul>
+                    <button class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-sm transition-colors order-btn" data-plan="TFZ LIFETIME">Commander</button>
+                </div>
+            </div>
+            
+            <div class="text-center mt-8">
+                 <p class="text-gray-400 text-sm"><i class="fas fa-lock text-brand-500 mr-2"></i> Paiement sécurisé via PayPal, Carte Bancaire et Crypto</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Compatibility Section -->
+    <section id="compatibility" class="py-20 bg-black">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-bold mb-12 reveal">Compatible avec <span class="text-brand-500">Tous les Appareils</span></h2>
+            
+            <div class="flex flex-wrap justify-center gap-8 md:gap-16 opacity-70">
+                <div class="reveal flex flex-col items-center gap-2 hover:opacity-100 hover:text-brand-500 transition-all cursor-pointer">
+                    <i class="fas fa-tv text-5xl mb-2"></i>
+                    <span>Smart TV</span>
+                </div>
+                <div class="reveal delay-100 flex flex-col items-center gap-2 hover:opacity-100 hover:text-brand-500 transition-all cursor-pointer">
+                    <i class="fab fa-android text-5xl mb-2"></i>
+                    <span>Android Box</span>
+                </div>
+                <div class="reveal delay-200 flex flex-col items-center gap-2 hover:opacity-100 hover:text-brand-500 transition-all cursor-pointer">
+                    <i class="fab fa-apple text-5xl mb-2"></i>
+                    <span>Apple TV/iOS</span>
+                </div>
+                <div class="reveal delay-300 flex flex-col items-center gap-2 hover:opacity-100 hover:text-brand-500 transition-all cursor-pointer">
+                    <i class="fas fa-laptop text-5xl mb-2"></i>
+                    <span>PC / Mac</span>
+                </div>
+                <div class="reveal delay-400 flex flex-col items-center gap-2 hover:opacity-100 hover:text-brand-500 transition-all cursor-pointer">
+                    <i class="fas fa-tablet-alt text-5xl mb-2"></i>
+                    <span>Tablette</span>
+                </div>
+                <div class="reveal delay-400 flex flex-col items-center gap-2 hover:opacity-100 hover:text-brand-500 transition-all cursor-pointer">
+                    <i class="fas fa-fire text-5xl mb-2"></i>
+                    <span>Fire Stick</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-20 bg-brand-dark">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold mb-10 text-center reveal">Questions Fréquentes</h2>
+            
+            <div class="space-y-4">
+                <!-- FAQ Item 1 -->
+                <div class="reveal glass rounded-lg overflow-hidden bg-brand-card">
+                    <button class="w-full p-4 text-left flex justify-between items-center focus:outline-none faq-btn">
+                        <span class="font-semibold text-lg">Comment fonctionne le service TIFOZERIA ?</span>
+                        <i class="fas fa-plus text-brand-500 transform transition-transform duration-200"></i>
+                    </button>
+                    <div class="max-h-0 overflow-hidden transition-all duration-300 px-4 text-gray-400 faq-content">
+                        <p class="pb-4">TFZ TV est un service de streaming IPTV premium. Après votre abonnement, vous recevrez vos identifiants par email. Vous pourrez ensuite accéder à toutes nos chaînes sportives via notre application ou un lecteur IPTV compatible.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="reveal delay-100 glass rounded-lg overflow-hidden bg-brand-card">
+                    <button class="w-full p-4 text-left flex justify-between items-center focus:outline-none faq-btn">
+                        <span class="font-semibold text-lg">Sur quels appareils puis-je regarder ?</span>
+                        <i class="fas fa-plus text-brand-500 transform transition-transform duration-200"></i>
+                    </button>
+                    <div class="max-h-0 overflow-hidden transition-all duration-300 px-4 text-gray-400 faq-content">
+                        <p class="pb-4">Vous pouvez regarder TFZ TV sur Smart TV, smartphone Android/iOS, tablette, ordinateur, Amazon Fire Stick, Apple TV, et toute box Android. Le nombre d'appareils simultanés dépend de votre forfait.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="reveal delay-200 glass rounded-lg overflow-hidden bg-brand-card">
+                    <button class="w-full p-4 text-left flex justify-between items-center focus:outline-none faq-btn">
+                        <span class="font-semibold text-lg">Quelles chaînes sportives sont incluses ?</span>
+                        <i class="fas fa-plus text-brand-500 transform transition-transform duration-200"></i>
+                    </button>
+                    <div class="max-h-0 overflow-hidden transition-all duration-300 px-4 text-gray-400 faq-content">
+                        <p class="pb-4">TFZ TV inclut toutes les grandes chaînes sportives: beIN Sports, Canal+ Sport, RMC Sport, Eurosport, Sky Sports, ESPN, DAZN, et bien plus. Vous aurez accès à la Ligue 1, Premier League, Liga, Serie A, Champions League, et tous les grands événements sportifs.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 4 -->
+                <div class="reveal delay-300 glass rounded-lg overflow-hidden bg-brand-card">
+                    <button class="w-full p-4 text-left flex justify-between items-center focus:outline-none faq-btn">
+                        <span class="font-semibold text-lg">Que se passe-t-il après ma commande ?</span>
+                        <i class="fas fa-plus text-brand-500 transform transition-transform duration-200"></i>
+                    </button>
+                    <div class="max-h-0 overflow-hidden transition-all duration-300 px-4 text-gray-400 faq-content">
+                        <p class="pb-4">Après votre commande, vous recevrez un email de confirmation contenant toutes les instructions de paiement ainsi que les méthodes disponibles. Suivez simplement les étapes indiquées pour finaliser votre abonnement.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 5 -->
+                <div class="reveal delay-400 glass rounded-lg overflow-hidden bg-brand-card">
+                    <button class="w-full p-4 text-left flex justify-between items-center focus:outline-none faq-btn">
+                        <span class="font-semibold text-lg">Proposez-vous un essai gratuit ?</span>
+                        <i class="fas fa-plus text-brand-500 transform transition-transform duration-200"></i>
+                    </button>
+                    <div class="max-h-0 overflow-hidden transition-all duration-300 px-4 text-gray-400 faq-content">
+                        <p class="pb-4">Oui! Nous offrons un essai de 24h pour vous permettre de tester notre service. Contactez-nous via WhatsApp ou utilisez notre assistant Tifo Analyzer pour plus d'informations.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 6 -->
+                <div class="reveal delay-500 glass rounded-lg overflow-hidden bg-brand-card">
+                    <button class="w-full p-4 text-left flex justify-between items-center focus:outline-none faq-btn">
+                        <span class="font-semibold text-lg">Comment contacter le support technique ?</span>
+                        <i class="fas fa-plus text-brand-500 transform transition-transform duration-200"></i>
+                    </button>
+                    <div class="max-h-0 overflow-hidden transition-all duration-300 px-4 text-gray-400 faq-content">
+                        <p class="pb-4">Notre support technique est disponible 24/7. Selon votre forfait, vous pouvez nous contacter par email, WhatsApp, ou bénéficier d'un support VIP prioritaire. Notre équipe répond généralement en moins de 30 minutes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black border-t border-gray-900 pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8 mb-12">
+                <div class="col-span-1 md:col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <!-- FOOTER LOGO -->
+                        <div class="flex items-center gap-1 cursor-pointer">
+                            <span class="text-3xl font-black text-brand-500 tracking-tighter">TFZ</span>
+                            <span class="text-3xl font-black text-white tracking-tighter">TV</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-sm">Le meilleur fournisseur de streaming en Europe. Qualité, stabilité et support inégalés.</p>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-bold mb-4">Liens Rapides</h4>
+                    <ul class="space-y-2 text-gray-500 text-sm">
+                        <li><a href="#" class="hover:text-brand-500 transition-colors">Accueil</a></li>
+                        <li><a href="#pricing" class="hover:text-brand-500 transition-colors">Tarifs</a></li>
+                        <li><a href="#compatibility" class="hover:text-brand-500 transition-colors">Guide d'Installation</a></li>
+                        <li><a href="#vod" class="hover:text-brand-500 transition-colors">VOD</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold mb-4">Légal</h4>
+                    <ul class="space-y-2 text-gray-500 text-sm">
+                        <li><a href="#" class="hover:text-brand-500 transition-colors">Termes et Conditions</a></li>
+                        <li><a href="#" class="hover:text-brand-500 transition-colors">Politique de Confidentialité</a></li>
+                        <li><a href="#" class="hover:text-brand-500 transition-colors">Politique de Remboursement</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold mb-4">Contact</h4>
+                    <ul class="space-y-2 text-gray-500 text-sm">
+                        <li class="flex items-center gap-2"><i class="fas fa-envelope text-brand-500"></i> support@tfztv.com</li>
+                        <li class="flex items-center gap-2"><i class="fab fa-whatsapp text-brand-500"></i> +33 123 456 789</li>
+                        <div class="flex gap-4 mt-4">
+                            <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-brand-500 hover:text-white transition-all"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-brand-500 hover:text-white transition-all"><i class="fab fa-telegram-plane"></i></a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-brand-500 hover:text-white transition-all"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-900 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
+                <p>&copy; 2024 TFZ TV. Tous droits réservés.</p>
+                <div class="flex gap-4 mt-4 md:mt-0">
+                    <i class="fab fa-cc-visa text-2xl"></i>
+                    <i class="fab fa-cc-mastercard text-2xl"></i>
+                    <i class="fab fa-cc-paypal text-2xl"></i>
+                    <i class="fab fa-bitcoin text-2xl"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating WhatsApp Button (Fusion Feature) -->
+    <a href="https://wa.me/33758874113" target="_blank" class="fixed bottom-6 right-6 z-50 bg-brand-whatsapp text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition-all hover:scale-110 whatsapp-pulse flex items-center justify-center w-16 h-16 group">
+        <i class="fab fa-whatsapp text-4xl"></i>
+        <!-- Tooltip -->
+        <span class="absolute right-full mr-4 bg-white text-black text-sm font-bold py-2 px-4 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            Discutez avec nous !
+        </span>
+    </a>
+
+    <!-- Scripts -->
+    <script>
+        // Navbar Scroll Effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('glass', 'shadow-lg');
+                navbar.classList.remove('py-4');
+                navbar.classList.add('py-2');
+                navbar.classList.add('bg-black/90');
+                navbar.classList.remove('bg-gradient-to-b');
+            } else {
+                navbar.classList.remove('glass', 'shadow-lg', 'py-2', 'bg-black/90');
+                navbar.classList.add('py-4');
+                navbar.classList.add('bg-gradient-to-b');
+            }
+        });
+
+        // Mobile Menu Toggle
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Smooth Scroll for Buttons
+        function scrollToPricing() {
+            document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // FAQ Accordion Logic
+        const faqBtns = document.querySelectorAll('.faq-btn');
+        
+        faqBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const content = btn.nextElementSibling;
+                const icon = btn.querySelector('i');
+                
+                // Toggle current
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                    icon.classList.remove('fa-minus');
+                    icon.classList.add('fa-plus');
+                    icon.style.transform = 'rotate(0deg)';
+                } else {
+                    // Close others (optional)
+                    document.querySelectorAll('.faq-content').forEach(c => c.style.maxHeight = null);
+                    document.querySelectorAll('.faq-btn i').forEach(i => {
+                        i.classList.remove('fa-minus');
+                        i.classList.add('fa-plus');
+                        i.style.transform = 'rotate(0deg)';
+                    });
+
+                    content.style.maxHeight = content.scrollHeight + "px";
+                    icon.classList.remove('fa-plus');
+                    icon.classList.add('fa-minus');
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            });
+        });
+
+        // Order Flow: ensure DOM parsed before wiring handlers
+        document.addEventListener('DOMContentLoaded', function(){
+                (function(){
+                const scriptURL = 'https://script.google.com/macros/s/AKfycbw11JkrifGd9QnVJmSufFdhwIL1HoIB5qn6scIrHCOHI2O3drtAsVr3Ox4bbRigfrEikg/exec'; // replace with your Google Apps Script URL
+
+                // Optional: Google Form integration
+                // If you prefer submitting directly to a Google Form, set `googleFormURL` to the form's POST URL
+                // and fill `googleFormFields` with the correct entry IDs (see instructions below).
+                // When `googleFormURL` is set, the client will send a FormData POST with mode:'no-cors'.
+                // Google Form POST endpoint (from your pre-filled link)
+                const googleFormURL = 'https://docs.google.com/forms/d/e/1FAIpQLScvqVOyOSjC0CuDQWJkIq7HxAzyMmKgU3zEMjxyk8EvxNnhAg/formResponse';
+                const googleFormFields = {
+                    name: 'entry.94239527',
+                    phone: 'entry.344836455',
+                    email: 'entry.1356552564',
+                    plan: 'entry.900646489'
+                };
+
+                function submitToGoogleForm(payload){
+                    // payload: { name, phone, email, plan }
+                    const fd = new FormData();
+                    if(googleFormFields.name) fd.append(googleFormFields.name, payload.name || '');
+                    if(googleFormFields.phone) fd.append(googleFormFields.phone, payload.phone || '');
+                    if(googleFormFields.email) fd.append(googleFormFields.email, payload.email || '');
+                    if(googleFormFields.plan) fd.append(googleFormFields.plan, payload.plan || '');
+
+                    // no-cors mode — response will be opaque; treat as success if no network error
+                    return fetch(googleFormURL, { method: 'POST', mode: 'no-cors', body: fd });
+                }
+
+                const modal = document.getElementById('order-flow-modal');
+                if(!modal) return; // safety
+                const form = document.getElementById('order-flow-form');
+                const step1 = modal.querySelector('.order-step[data-step="1"]');
+                const step2 = modal.querySelector('.order-step[data-step="2"]');
+                const inputName = document.getElementById('of-name');
+                const inputPhone = document.getElementById('of-phone');
+                const inputEmail = document.getElementById('of-email');
+                const inputPlan = document.getElementById('of-plan');
+                const btnCancel = document.getElementById('of-cancel');
+                const btnSubmit = document.getElementById('of-submit');
+                const btnClose = document.getElementById('of-close');
+                const btnModalClose = modal.querySelector('.order-modal-close');
+
+                function openModal(plan) {
+                    inputPlan.value = plan || '';
+                    step1.hidden = false; step2.hidden = true;
+                    modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
+                    inputName.focus();
+                }
+
+                function closeModal() { modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow = ''; form.reset(); }
+
+                function showSuccessState(){
+                    step1.hidden = true; step2.hidden = false;
+                    // trigger success animation
+                    const successEl = step2.querySelector('.order-success');
+                    if(successEl){
+                        successEl.classList.remove('animate');
+                        // force reflow to restart animation
+                        void successEl.offsetWidth;
+                        successEl.classList.add('animate');
+                    }
+                    // keep modal open briefly so user sees animation, then close
+                    setTimeout(closeModal, 5500);
+                }
+
+                function showLoading(state){ if(state){ btnSubmit.disabled = true; btnSubmit.innerHTML = '<span class="of-spinner" aria-hidden="true"></span>Envoi...'; } else { btnSubmit.disabled = false; btnSubmit.innerHTML = 'Confirmer la commande'; } }
+
+                function validateEmail(email){ return /\S+@\S+\.\S+/.test(email); }
+
+                form.addEventListener('submit', function(e){
+                    e.preventDefault();
+                    const name = inputName.value.trim();
+                    const phone = inputPhone.value.trim();
+                    const email = inputEmail.value.trim();
+                    const plan = inputPlan.value || '';
+                    if(!name) return inputName.focus() || alert('Veuillez saisir votre nom complet.');
+                    if(!phone) return inputPhone.focus() || alert('Veuillez saisir votre numéro de téléphone.');
+                    if(!email || !validateEmail(email)) return inputEmail.focus() || alert('Veuillez saisir une adresse e-mail valide.');
+
+                    const payload = { name, phone, email, plan, timestamp: new Date().toISOString() };
+                    showLoading(true);
+
+                    // If googleFormURL is set, submit as FormData to the Google Form (mode:'no-cors')
+                    if(googleFormURL) {
+                        submitToGoogleForm(payload)
+                            .then(() => {
+                                showLoading(false);
+                                console.log('Submitted to Google Form (opaque response).', payload);
+                                showSuccessState();
+                            })
+                            .catch(err => {
+                                showLoading(false);
+                                console.error('Google Form submit error', err);
+                                alert('Erreur réseau lors de l\'envoi au formulaire Google. Voir console pour dettagli.');
+                            });
+                        return;
+                    }
+
+                    // Otherwise, send JSON payload to Apps Script endpoint
+                    fetch(scriptURL, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload) })
+                        .then(async resp => {
+                            showLoading(false);
+                            const text = await resp.text().catch(() => '');
+                            console.log('Order response', resp.status, text, { payload });
+                            if(!resp.ok) {
+                                alert('Erreur lors de l\'envoi: ' + resp.status + '\nVérifiez le déploiement Apps Script et les en-têtes CORS. (Voir console pour détails)');
+                                throw new Error('Network response not ok: ' + resp.status);
+                            }
+                            try{ const json = JSON.parse(text || '{}'); console.log('Order response JSON:', json); }catch(e){}
+                            showSuccessState();
+                        })
+                        .catch(err => {
+                            showLoading(false);
+                            console.error('Order submit error', err);
+                            if(err instanceof TypeError) {
+                                alert('Erreur réseau/CORS détectée. Assurez-vous que votre Google Apps Script est déployé comme "Web app" e accessibile. Voir console per dettagli.');
+                            } else {
+                                alert('Une erreur est survenue lors de l\'envoi. Veuillez réessayer plus tard.');
+                            }
+                        });
+                });
+
+                btnCancel.addEventListener('click', closeModal);
+                if(btnClose) btnClose.addEventListener('click', closeModal);
+                if(btnModalClose) btnModalClose.addEventListener('click', closeModal);
+                document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+                modal.addEventListener('click', function(e){ if(e.target === modal) closeModal(); });
+
+                // Delegated click: open modal on buttons with .btn-commander or .order-btn, or button text containing 'Commander'
+                document.body.addEventListener('click', function(e){
+                    const btn = e.target.closest('.btn-commander, .order-btn');
+                    if(btn){ e.preventDefault(); const plan = btn.getAttribute('data-plan') || btn.dataset.plan || btn.textContent.trim(); openModal(plan); return; }
+                    const btnText = e.target.closest('button');
+                    if(btnText && /Commander/i.test(btnText.textContent)){ e.preventDefault(); const plan = btnText.getAttribute('data-plan') || btnText.textContent.trim(); openModal(plan); }
+                });
+            })();
+        });
+
+        // --- SCROLL REVEAL SCRIPT ---
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+
+    <!-- Lightbox Markup -->
+    <div id="tfz-lightbox" aria-hidden="true">
+        <button class="lb-close" aria-label="Chiudi">✕</button>
+        <button class="lb-btn lb-prev" aria-label="Precedente">‹</button>
+        <div class="lb-inner">
+            <img id="tfz-lightbox-img" src="" alt="Preview">
+        </div>
+        <button class="lb-btn lb-next" aria-label="Successiva">›</button>
+    </div>
+
+    <!-- Order Flow modal (added) -->
+    <div id="order-flow-modal" aria-hidden="true">
+        <div class="order-card" role="dialog" aria-modal="true" aria-labelledby="order-flow-title">
+            <div class="card-body">
+                <button class="order-modal-close" title="Fermer" style="float:right;background:transparent;border:none;color:#fff;font-size:18px;cursor:pointer">✕</button>
+                <!-- Step 1: Data entry -->
+                <div class="order-step" data-step="1">
+                    <h3 id="order-flow-title">Finaliser votre commande</h3>
+                    <p class="lead">Pour commander, veuillez saisir vos informations personnelles ci-dessous.</p>
+                    <form id="order-flow-form" novalidate>
+                        <label for="of-name">Nom complet</label>
+                        <input id="of-name" name="name" type="text" placeholder="Jean Dupont" required />
+
+                        <label for="of-phone">Numéro de téléphone</label>
+                        <input id="of-phone" name="phone" type="tel" placeholder="+33 6 12 34 56 78" required />
+
+                        <label for="of-email">Adresse e-mail</label>
+                        <input id="of-email" name="email" type="email" placeholder="jean@example.com" required />
+
+                        <input type="hidden" id="of-plan" name="plan" value="" />
+
+                        <div class="actions" style="margin-top:8px;">
+                            <button type="button" class="btn-ghost" id="of-cancel">Annuler</button>
+                            <button type="submit" class="btn-primary" id="of-submit">Confirmer la commande</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Step 2: Success -->
+                <div class="order-step" data-step="2" hidden>
+                    <div class="order-success">
+                        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" aria-hidden>
+                            <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" />
+                            <path d="M7 12.5l2.5 2.5L17 8" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <h3>Votre commande a été effectuée avec succès !</h3>
+                        <p>Un de nos agents vous contactera sous peu pour finaliser les détails.</p>
+                        <div style="margin-top:14px;"><button class="btn-primary" id="of-close">Fermer</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>
